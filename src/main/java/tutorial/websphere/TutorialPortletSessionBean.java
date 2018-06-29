@@ -10,7 +10,7 @@ public class TutorialPortletSessionBean implements Serializable {
 	private String apellido;
 	private String documento;
 	private String email;
-	private String edad;
+	private int edad;
 
 	public TutorialPortletSessionBean() {
 		super();
@@ -18,10 +18,10 @@ public class TutorialPortletSessionBean implements Serializable {
 		apellido = "";
 		documento = "";
 		email = "";
-		edad = "";
+		edad = 0;
 	}
 
-	public TutorialPortletSessionBean(String nombre, String apellido, String documento, String email, String edad) {
+	public TutorialPortletSessionBean(String nombre, String apellido, String documento, String email, int edad) {
 		super();
 		this.nombre = nombre;
 		this.apellido = apellido;
@@ -62,11 +62,11 @@ public class TutorialPortletSessionBean implements Serializable {
 		this.email = email;
 	}
 
-	public String getEdad() {
+	public int getEdad() {
 		return edad;
 	}
 
-	public void setEdad(String edad) {
+	public void setEdad(int edad) {
 		this.edad = edad;
 	}
 

@@ -2,34 +2,33 @@ package tutorial.websphere;
 
 import java.io.*;
 import java.lang.reflect.Method;
+import java.util.stream.Collectors;
+
 import javax.portlet.*;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 import tutorial.websphere.TutorialPortletSessionBean;
 
 /**
  * A sample portlet based on GenericPortlet
  */
-public class TutorialPortlet extends GenericPortlet{
+public class TutorialPortlet extends GenericPortlet {
 
-	public static final String JSP_FOLDER = "/jsp/"; 
-	public static final String JS_FOLDER = "/script/"; 
-	public static final String CSS_FOLDER = "/css/"; 
+	public static final String JSP_FOLDER = "/jsp/";
+	public static final String JS_FOLDER = "/script/";
+	public static final String CSS_FOLDER = "/css/";
 
-	public static final String VIEW_JSP = "websphereView.jsp"; 
-	public static final String EDIT_JSP = "websphereEdit.jsp"; 
-	public static final String HELP_JSP = "websphereHelp.jsp"; 
-	public static final String CONFIG_JSP = "websphereConfig.jsp"; 
+	public static final String VIEW_JSP = "websphereView.jsp";
 
-	public static final String SESSION_BEAN = "websphereSessionBean"; 
+	public static final String SESSION_BEAN = "websphereSessionBean";
 
 	public static final String FIELD_NOMBRE = "setNombre";
 	public static final String FIELD_APELLIDO = "setApellido";
 	public static final String FIELD_DOCUMENTO = "setDocumento";
 	public static final String FIELD_EMAIL = "setEmail";
 	public static final String FIELD_EDAD = "setEdad";
-	public static final String FORM_SUBMIT = "websphereFormSubmit"; 
-
-	private static final PortletMode CUSTOM_CONFIG_MODE = new PortletMode("config");
+	public static final String FORM_SUBMIT = "websphereFormSubmit";
 
 	public void init() throws PortletException {
 		super.init();
@@ -48,60 +47,35 @@ public class TutorialPortlet extends GenericPortlet{
 		rd.include(request, response);
 	}
 
-	protected void doDispatch(RenderRequest request, RenderResponse response) throws PortletException, IOException {
-		System.out.println("doDispatch");
-		if (!WindowState.MINIMIZED.equals(request.getWindowState())) {
-			PortletMode mode = request.getPortletMode();
-			if (CUSTOM_CONFIG_MODE.equals(mode)) {
-				response.setContentType(request.getResponseContentType());
-				PortletRequestDispatcher rd = getPortletContext().getRequestDispatcher(JSP_FOLDER + CONFIG_JSP);
-				rd.include(request, response);
-				return;
+	public void serveResource(ResourceRequest request, ResourceResponse response) throws PortletException, IOException {
+		System.out.println("serveResource");
+		int modo = Integer.parseInt(request.getParameter("modo"));
+		PrintWriter writer;
+		response.setCharacterEncoding("UTF-8");
+		Gson gson = new Gson();
+		String resultado = "";
+		if (modo == 1){
+			TutorialPortletSessionBean bean = (TutorialPortletSessionBean) request.getPortletSession().getAttribute(SESSION_BEAN);
+			if (bean == null){
+				bean = new TutorialPortletSessionBean();
 			}
+			resultado = gson.toJson(bean);
+		}else if (modo == 2){
+			String datos = new BufferedReader(new InputStreamReader(request.getPortletInputStream())).lines().collect(Collectors.joining("\n"));
+			TutorialPortletSessionBean bean = gson.fromJson(datos, TutorialPortletSessionBean.class);
+			JsonObject json = new JsonObject();
+			json.addProperty("mensaje", "Bean actualizado satisfactoriamente");
+			resultado = json.toString();
+			request.getPortletSession().setAttribute(SESSION_BEAN, bean);
+		}														
+		try {			
+			writer = response.getWriter();
+			writer.write(resultado);
+			writer.close();
+		} catch (Exception e) {
 		}
-		super.doDispatch(request, response);
+		
 	}
-
-	public void doEdit(RenderRequest request, RenderResponse response) throws PortletException, IOException {
-		System.out.println("doEdit");
-		response.setContentType(request.getResponseContentType());
-		TutorialPortletSessionBean sessionBean = getSessionBean(request);
-		if (sessionBean == null) {
-			response.getWriter().println("<b>NO PORTLET SESSION YET</b>");
-			return;
-		}
-		PortletRequestDispatcher rd = getPortletContext().getRequestDispatcher(JSP_FOLDER + EDIT_JSP);
-		rd.include(request, response);
-	}
-
-	protected void doHelp(RenderRequest request, RenderResponse response) throws PortletException, IOException {
-		System.out.println("doHelp");
-		response.setContentType(request.getResponseContentType());
-		PortletRequestDispatcher rd = getPortletContext().getRequestDispatcher(JSP_FOLDER + HELP_JSP);
-		rd.include(request, response);
-	}
-
-	@ProcessAction(name = FORM_SUBMIT)
-	public void customProcessAction(ActionRequest request, ActionResponse response)
-			throws PortletException, java.io.IOException {
-		System.out.println("processAction: " + FORM_SUBMIT);
-		TutorialPortletSessionBean sessionBean = getSessionBean(request);
-		if (sessionBean != null) {
-			request.getParameterMap().forEach((k, v) -> {
-				if (request.getParameter(k) != null) {
-					try {
-						Method method = TutorialPortletSessionBean.class.getMethod(k, String.class);
-						method.invoke(sessionBean, request.getParameter(k));						
-					} catch (Exception e) {
-					}
-				}
-			});
-			Gson gson = new Gson();
-			response.setEvent("bean-param", gson.toJson(sessionBean));
-			response.setRenderParameter("bean-param", gson.toJson(sessionBean));
-			System.out.println("Envió evento");
-		}		
-	}		
 
 	public void destroy() {
 		System.out.println("destroy");

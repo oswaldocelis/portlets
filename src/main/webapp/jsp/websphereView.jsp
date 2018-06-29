@@ -16,59 +16,41 @@
 >
 <link rel="stylesheet"
    href='<%=renderResponse.encodeURL(renderRequest.getContextPath()
-               + tutorial.websphere.TutorialPortlet.CSS_FOLDER + "bootstrap.min.css")%>'
+					+ tutorial.websphere.TutorialPortlet.CSS_FOLDER + "bootstrap.min.css")%>'
    type="text/css"
 >
-
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.2/angular.min.js"></script>
 <script
-   src='<%=renderResponse.encodeURL(renderRequest.getContextPath()
-               + tutorial.websphere.TutorialPortlet.JS_FOLDER + "jquery-3.3.1.min.js")%>'
+   src='<%=renderResponse.encodeURL(
+					renderRequest.getContextPath() + tutorial.websphere.TutorialPortlet.JS_FOLDER + "websphere.js")%>'
 ></script>
-<script
-   src='<%=renderResponse.encodeURL(renderRequest.getContextPath()
-               + tutorial.websphere.TutorialPortlet.JS_FOLDER + "bootstrap.min.js")%>'
-></script>
-<script>
-   var actionURL = '<portlet:actionURL/>';
-   var resourcerURL = '<portlet:resourceURL/>';
-</script>
 
-<div id="contenido">
-   <h1>Página para el modo VIEW</h1>
 
-   <h3>Uso de processAction() con anotación</h3>
-   <form action="<%=actionURL%>" method="POST id="formURL"">
+<div id="contenido" ng-app="app" ng-controller="BeanController" data-ng-init="inicializar('<portlet:resourceURL/>')">
+   <form ng-submit="enviar('<portlet:resourceURL/>')">
       <div class="form-group">
-         <label for="<%=TutorialPortlet.FIELD_NOMBRE%>" name="">Nombre</label>
-         <input class="form-control" name="<%=TutorialPortlet.FIELD_NOMBRE%>" type="text"
-            value="<%=sessionBean.getNombre()%>"
-         />
+         <label for="nombre">Nombre</label>
+         <input class="form-control" name="nombre" ng-model="bean.nombre" required />
       </div>
       <div class="form-group">
-         <label for="<%=TutorialPortlet.FIELD_APELLIDO%>" name="">Apellido</label>
-         <input class="form-control" name="<%=TutorialPortlet.FIELD_APELLIDO%>" type="text"
-            value="<%=sessionBean.getApellido()%>"
-         />
+         <label for="apellido">Apellido</label>
+         <input class="form-control" name="apellido" ng-model="bean.apellido" required />
       </div>
       <div class="form-group">
-         <label for="<%=TutorialPortlet.FIELD_DOCUMENTO%>" name="">Documento</label>
-         <input class="form-control" name="<%=TutorialPortlet.FIELD_DOCUMENTO%>" type="text"
-            value="<%=sessionBean.getDocumento()%>"
-         />
+         <label for="documento">Documento</label>
+         <input class="form-control" name="documento" ng-model="bean.documento" required />
       </div>
       <div class="form-group">
-         <label for="<%=TutorialPortlet.FIELD_EDAD%>" name="">Edad</label>
-         <input class="form-control" name="<%=TutorialPortlet.FIELD_EDAD%>" type="text"
-            value="<%=sessionBean.getEdad()%>"
-         />
+         <label for="email">Email</label>
+         <input class="form-control" type="email" name="email" ng-model="bean.email" required />
       </div>
       <div class="form-group">
-         <label for="<%=TutorialPortlet.FIELD_EMAIL%>" name="">Email</label>
-         <input class="form-control" name="<%=TutorialPortlet.FIELD_EMAIL%>" type="text" value="<%=sessionBean.getEmail()%>" />
+         <label for="edad">Edad</label>
+         <input class="form-control" type="number" name="edad" ng-model="bean.edad" required />
       </div>
-      <input type="submit" class="btn btn-primary" name="<%=TutorialPortlet.FORM_SUBMIT%>" />
+      <input type="submit" class="btn btn-primary" value="Enviar formulario" />
+
    </form>
-
-   <%@include file="modos.html"%>
-
+   <div class="alert alert-success" role="alert" ng-show="mensaje != ''">{{mensaje}}</div>
 </div>
+
