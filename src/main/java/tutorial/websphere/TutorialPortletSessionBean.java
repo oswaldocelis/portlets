@@ -2,16 +2,16 @@ package tutorial.websphere;
 
 import java.io.Serializable;
 
-public class TutorialPortletSessionBean implements Serializable{
-	
+public class TutorialPortletSessionBean implements Serializable {
+
 	private static final long serialVersionUID = -8553202539180124756L;
-	
+
 	private String nombre;
 	private String apellido;
 	private String documento;
 	private String email;
-	private String edad;	
-	
+	private String edad;
+
 	public TutorialPortletSessionBean() {
 		super();
 		nombre = "";
@@ -19,6 +19,15 @@ public class TutorialPortletSessionBean implements Serializable{
 		documento = "";
 		email = "";
 		edad = "";
+	}
+
+	public TutorialPortletSessionBean(String nombre, String apellido, String documento, String email, String edad) {
+		super();
+		this.nombre = nombre;
+		this.apellido = apellido;
+		this.documento = documento;
+		this.email = email;
+		this.edad = edad;
 	}
 
 	public String getNombre() {

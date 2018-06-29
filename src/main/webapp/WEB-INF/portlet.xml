@@ -5,7 +5,7 @@
 	id="tutorial.websphere.TutorialPortlet">
 	<portlet>
 		<portlet-name>websphere</portlet-name>
-		<display-name xml:lang="en">websphere</display-name>
+		<display-name xml:lang="es">websphere</display-name>
 		<display-name>websphere</display-name>
 		<portlet-class>tutorial.websphere.TutorialPortlet</portlet-class>
 		<expiration-cache>0</expiration-cache>
@@ -22,10 +22,44 @@
 			<title>Tutorial</title>
 			<short-title>Tutorial</short-title>
 			<keywords>Tutorial</keywords>
-		</portlet-info>					
+		</portlet-info>
+		<supported-publishing-event>
+			<name>bean-event</name>
+		</supported-publishing-event>
+		<supported-public-render-parameter>bean-param</supported-public-render-parameter>
+	</portlet>
+	<portlet>
+		<portlet-name>websphereAux</portlet-name>
+		<display-name xml:lang="es">websphereAux</display-name>
+		<display-name>websphereAux</display-name>
+		<portlet-class>tutorial.websphere.TutorialPortletAux</portlet-class>
+		<expiration-cache>0</expiration-cache>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<supported-locale>en</supported-locale>
+		<resource-bundle>nl/TutorialPortletResource</resource-bundle>
+		<portlet-info>
+			<title>Tutorial Aux</title>
+			<short-title>Tutorial Aux</short-title>
+			<keywords>Tutorial Aux</keywords>
+		</portlet-info>
+		<supported-processing-event>
+			<name>bean-event</name>
+		</supported-processing-event>
+		<supported-public-render-parameter>bean-param</supported-public-render-parameter>
 	</portlet>
 	<custom-portlet-mode>
 		<portlet-mode>config</portlet-mode>
-	</custom-portlet-mode>	
+	</custom-portlet-mode>
 	<default-namespace>http://Tutorial/</default-namespace>
+	<event-definition>
+		<name>bean-event</name>
+		<value-type>java.lang.String</value-type>
+	</event-definition>
+	<public-render-parameter>
+   	  <identifier>versiones</identifier>
+   	  <name>bean-param</name>
+    </public-render-parameter>
 </portlet-app>

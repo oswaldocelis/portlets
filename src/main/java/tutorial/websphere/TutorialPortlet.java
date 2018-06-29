@@ -91,31 +91,17 @@ public class TutorialPortlet extends GenericPortlet{
 				if (request.getParameter(k) != null) {
 					try {
 						Method method = TutorialPortletSessionBean.class.getMethod(k, String.class);
-						method.invoke(sessionBean, request.getParameter(k));
+						method.invoke(sessionBean, request.getParameter(k));						
 					} catch (Exception e) {
 					}
 				}
-			});			
-		}
-	}	
-
-	public void serveResource(ResourceRequest request, ResourceResponse response) throws PortletException, IOException {
-		System.out.println("serveResource");
-		response.setCharacterEncoding("UTF-8");
-		PrintWriter writer;
-		String data = "{}";
-		Gson gson = new Gson();
-		TutorialPortletSessionBean sessionBean = getSessionBean(request);
-		if (sessionBean != null) {
-			data = gson.toJson(sessionBean).toString();
-		}
-		try {
-			writer = response.getWriter();
-			writer.write(data);
-			writer.close();
-		} catch (Exception e) {
-		}
-	}
+			});
+			Gson gson = new Gson();
+			response.setEvent("bean-param", gson.toJson(sessionBean));
+			response.setRenderParameter("bean-param", gson.toJson(sessionBean));
+			System.out.println("Envió evento");
+		}		
+	}		
 
 	public void destroy() {
 		System.out.println("destroy");
