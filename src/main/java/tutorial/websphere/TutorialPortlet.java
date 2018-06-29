@@ -2,32 +2,38 @@ package tutorial.websphere;
 
 import java.io.*;
 import java.lang.reflect.Method;
+import java.util.stream.Collectors;
+
 import javax.portlet.*;
+
+import org.apache.commons.fileupload.FileUpload;
+import org.apache.commons.fileupload.MultipartStream;
+
 import com.google.gson.Gson;
 import tutorial.websphere.TutorialPortletSessionBean;
 
 /**
  * A sample portlet based on GenericPortlet
  */
-public class TutorialPortlet extends GenericPortlet{
+public class TutorialPortlet extends GenericPortlet {
 
-	public static final String JSP_FOLDER = "/jsp/"; 
-	public static final String JS_FOLDER = "/script/"; 
-	public static final String CSS_FOLDER = "/css/"; 
+	public static final String JSP_FOLDER = "/jsp/";
+	public static final String JS_FOLDER = "/script/";
+	public static final String CSS_FOLDER = "/css/";
 
-	public static final String VIEW_JSP = "websphereView.jsp"; 
-	public static final String EDIT_JSP = "websphereEdit.jsp"; 
-	public static final String HELP_JSP = "websphereHelp.jsp"; 
-	public static final String CONFIG_JSP = "websphereConfig.jsp"; 
+	public static final String VIEW_JSP = "websphereView.jsp";
+	public static final String EDIT_JSP = "websphereEdit.jsp";
+	public static final String HELP_JSP = "websphereHelp.jsp";
+	public static final String CONFIG_JSP = "websphereConfig.jsp";
 
-	public static final String SESSION_BEAN = "websphereSessionBean"; 
+	public static final String SESSION_BEAN = "websphereSessionBean";
 
-	public static final String FIELD_NOMBRE = "setNombre";
-	public static final String FIELD_APELLIDO = "setApellido";
-	public static final String FIELD_DOCUMENTO = "setDocumento";
-	public static final String FIELD_EMAIL = "setEmail";
-	public static final String FIELD_EDAD = "setEdad";
-	public static final String FORM_SUBMIT = "websphereFormSubmit"; 
+	public static final String FIELD_NOMBRE = "nombre";
+	public static final String FIELD_APELLIDO = "apellido";
+	public static final String FIELD_DOCUMENTO = "documento";
+	public static final String FIELD_EMAIL = "email";
+	public static final String FIELD_EDAD = "edad";
+	public static final String FORM_SUBMIT = "websphereFormSubmit";
 
 	private static final PortletMode CUSTOM_CONFIG_MODE = new PortletMode("config");
 
@@ -81,40 +87,72 @@ public class TutorialPortlet extends GenericPortlet{
 		rd.include(request, response);
 	}
 
-	@ProcessAction(name = FORM_SUBMIT)
-	public void customProcessAction(ActionRequest request, ActionResponse response)
-			throws PortletException, java.io.IOException {
-		System.out.println("processAction: " + FORM_SUBMIT);
-		TutorialPortletSessionBean sessionBean = getSessionBean(request);
-		if (sessionBean != null) {
-			request.getParameterMap().forEach((k, v) -> {
-				if (request.getParameter(k) != null) {
-					try {
-						Method method = TutorialPortletSessionBean.class.getMethod(k, String.class);
-						method.invoke(sessionBean, request.getParameter(k));
-					} catch (Exception e) {
-					}
-				}
-			});			
-		}
-	}	
-
 	public void serveResource(ResourceRequest request, ResourceResponse response) throws PortletException, IOException {
 		System.out.println("serveResource");
-		response.setCharacterEncoding("UTF-8");
 		PrintWriter writer;
+		String modo = request.getParameter("modo");
+		System.out.println("modo: " + modo);
 		String data = "{}";
 		Gson gson = new Gson();
-		TutorialPortletSessionBean sessionBean = getSessionBean(request);
-		if (sessionBean != null) {
-			data = gson.toJson(sessionBean).toString();
+		TutorialPortletSessionBean bean = new TutorialPortletSessionBean();
+		if ("1".equals(modo)) {			
+			response.setCharacterEncoding("UTF-8");
+			bean.setNombre("Camilo");
+			bean.setApellido("Beltrán");
+			bean.setEdad("" + ((int) (Math.random() * 10) + 18));
+			bean.setEmail("camilo.beltran@colombia.com");
+			bean.setDocumento("123456789");
+		} else if ("2".equals(modo)) {
+			response.setContentType("text/plain");
+			response.addProperty("Content-Disposition", "attachment; filename=profile.txt");
+			bean.setNombre("Camilo");
+			bean.setApellido("Beltrán");
+			bean.setEdad("" + ((int) (Math.random() * 10) + 18));
+			bean.setEmail("camilo.beltran@colombia.com");
+			bean.setDocumento("123456789");
+			data = gson.toJson(bean).toString();
+			OutputStream out = response.getPortletOutputStream();
+			InputStream in = new ByteArrayInputStream(data.getBytes());
+			byte[] buffer = new byte[4096];
+			int len;
+			while ((len = in.read(buffer)) != -1) {
+				out.write(buffer, 0, len);
+			}
+			out.flush();
+			in.close();
+			out.close();
+			return;
+		} else {
+			MultipartStream multipartStream = new MultipartStream(request.getPortletInputStream(),
+					extractBoundary(request).getBytes(), 1024, null);
+			boolean nextPart = multipartStream.skipPreamble();
+			while (nextPart) {
+				String header = multipartStream.readHeaders();
+				if (header.contains("filename")) {
+					// if input is file
+					ByteArrayOutputStream output = new ByteArrayOutputStream();
+					multipartStream.readBodyData(output);
+					output.flush();
+					output.close();
+					bean = gson.fromJson(output.toString("utf-8"), TutorialPortletSessionBean.class);
+				}
+				nextPart = multipartStream.readBoundary();
+			}
 		}
+		data = gson.toJson(bean).toString();
 		try {
 			writer = response.getWriter();
 			writer.write(data);
 			writer.close();
 		} catch (Exception e) {
 		}
+		request.getPortletSession().setAttribute(SESSION_BEAN, bean);
+	}
+
+	private String extractBoundary(ResourceRequest request) {
+		String boundaryHeader = "boundary=";
+		int i = request.getContentType().indexOf(boundaryHeader) + boundaryHeader.length();
+		return request.getContentType().substring(i);
 	}
 
 	public void destroy() {

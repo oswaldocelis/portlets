@@ -1,3 +1,11 @@
+#contenido{
+	max-width: 1024px; 
+	margin: 20px auto;
+}
+.modos{
+	text-align:center;
+	margin: 20px auto;
+}
 .modos form{
-	display:inline-block;
+	display:inline-block;	
 }

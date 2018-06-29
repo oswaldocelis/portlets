@@ -1,0 +1,7 @@
+{
+	"nombre":"Yerry",
+	"apellido":"Mina",
+	"documento":"22222222",
+	"email":"yerry.mina@lasele.com.co",
+	"edad":"22"
+}
